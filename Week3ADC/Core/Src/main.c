@@ -45,14 +45,16 @@ ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+GPIO_PinState Button[2] ;
 uint16_t adcdata[2] = { 0 };
-
+int ADCMode = 0 ;
+float ADCConverted = 0 ;
 typedef struct {
 	ADC_ChannelConfTypeDef Config;
 	uint16_t data;
 } ADCStructure;
 
-ADCStructure ADCChannel[3] = { 0 };
+ADCStructure ADCChannel[2] = { 0 };
 
 /* USER CODE END PV */
 
@@ -112,8 +114,24 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+		Button[0] = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) ;
+		if (Button[1] == 1 && Button[0] == 0)
+		{
+			ADCMode = !ADCMode ;
+		}
 
 		ADCPollingMethodUpdate();
+		if(ADCMode == 0 )
+		{
+			ADCConverted = ADCChannel[0].data * 3.3 / 4096 ;
+		}
+
+		if (ADCMode == 1)
+		{
+			ADCConverted = (((ADCChannel[1].data * 3.3/4096
+					) - 0.76)/(2.5/1000))+25 ;
+		}
+		Button[1] = Button[0] ;
 	}
 	/* USER CODE END 3 */
 }
@@ -276,18 +294,15 @@ void ADCPollingMethodInit() {
 	ADCChannel[0].Config.Rank = 1;
 	ADCChannel[0].Config.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 
-	ADCChannel[1].Config.Channel = ADC_CHANNEL_1;
+
+	ADCChannel[1].Config.Channel = ADC_CHANNEL_TEMPSENSOR;
 	ADCChannel[1].Config.Rank = 1;
 	ADCChannel[1].Config.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-
-	ADCChannel[2].Config.Channel = ADC_CHANNEL_TEMPSENSOR;
-	ADCChannel[2].Config.Rank = 1;
-	ADCChannel[2].Config.SamplingTime = ADC_SAMPLETIME_3CYCLES;
 }
 //Polling Method
 void ADCPollingMethodUpdate() {
 	//Read all 3 Channel
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 2; i++) {
 		HAL_ADC_ConfigChannel(&hadc1, &ADCChannel[i].Config);
 		HAL_ADC_Start(&hadc1);
 		HAL_ADC_PollForConversion(&hadc1, 10);
