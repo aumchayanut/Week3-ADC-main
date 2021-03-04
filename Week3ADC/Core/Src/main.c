@@ -123,13 +123,13 @@ int main(void) {
 		ADCPollingMethodUpdate();
 		if(ADCMode == 0 )
 		{
-			ADCConverted = ADCChannel[0].data * 3.3 / 4096 ;
+			ADCConverted = ADCChannel[0].data * 3.3 / 4096.0 * 1000 ;
 		}
 
 		if (ADCMode == 1)
 		{
-			ADCConverted = (((ADCChannel[1].data * 3.3/4096
-					) - 0.76)/(2.5/1000))+25 ;
+			ADCConverted = (((ADCChannel[1].data * 3.3/4096.0
+					) - 0.76)/(2.5/1000.0))+25.0 ;
 		}
 		Button[1] = Button[0] ;
 	}
